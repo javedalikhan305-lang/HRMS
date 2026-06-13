@@ -18,6 +18,8 @@ mongoose.connect(env.mongoUri)
         console.log('✅ MongoDB Connected Successfully');
         const server = app.listen(Number(PORT), '0.0.0.0', () => {
             console.log(`🚀 Server running on http://localhost:${PORT}`);
+            console.log(`🌐 Frontend: http://localhost:${PORT}`);
+            console.log(`🔗 API:      http://localhost:${PORT}/api/v1`);
         });
 
         process.on('unhandledRejection', (err: any) => {
