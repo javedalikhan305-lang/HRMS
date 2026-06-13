@@ -3,6 +3,8 @@ import { TenantRepository } from '../repositories/tenant.repository';
 import { ApiError } from '../utils/ApiError';
 import { UserRole } from '../models/user.model';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 const userRepository = new UserRepository();
 const tenantRepository = new TenantRepository();
@@ -82,7 +84,7 @@ export class AuthService {
         try {
             const decodedToken: any = jwt.verify(
                 incomingRefreshToken,
-                process.env.REFRESH_TOKEN_SECRET || 'refresh_secret'
+                env.refreshTokenSecret
             );
 
             const user = await userRepository.findById(decodedToken?._id);
@@ -94,11 +96,6 @@ export class AuthService {
             if (incomingRefreshToken !== user.refreshToken) {
                 throw new ApiError(401, "Refresh token is expired or used");
             }
-
-            const options = {
-                httpOnly: true,
-                secure: true
-            };
 
             const accessToken = user.generateAccessToken();
             const newRefreshToken = user.generateRefreshToken();
@@ -112,4 +109,3 @@ export class AuthService {
         }
     }
 }
-import jwt from 'jsonwebtoken';

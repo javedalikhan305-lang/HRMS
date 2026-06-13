@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { ApiError } from './utils/ApiError';
+import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
 import orgRoutes from './routes/org.routes';
 import employeeRoutes from './routes/employee.routes';
@@ -25,11 +26,13 @@ dotenv.config();
 
 const app: Application = express();
 
+app.set('trust proxy', 1);
+
 // Middlewares
 // app.use(helmet());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN 
-        ? process.env.CORS_ORIGIN.split(',') 
+    origin: env.corsOrigin
+        ? env.corsOrigin.split(',').map((origin) => origin.trim())
         : ['http://localhost:5173', 'http://127.0.0.1:5173'],
     credentials: true
 }));

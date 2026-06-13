@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ApiError } from '../utils/ApiError';
+import { cookieOptions } from '../config/env';
 
 const authService = new AuthService();
 
@@ -22,16 +23,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
     const { user, accessToken, refreshToken } = await authService.login(email, password);
 
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none' as const
-    };
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
             new ApiResponse(200, { user, accessToken, refreshToken }, "Logged in successfully")
         );
@@ -42,15 +37,10 @@ export const logout = asyncHandler(async (req: any, res: Response) => {
     user.refreshToken = undefined;
     await user.save({ validateBeforeSave: false });
 
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
-    };
-
     return res
         .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
         .json(new ApiResponse(200, {}, "Logged out successfully"));
 });
 
@@ -63,15 +53,10 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
 
     const { accessToken, refreshToken } = await authService.refreshAccessToken(incomingRefreshToken);
 
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
-    };
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
             new ApiResponse(200, { accessToken, refreshToken }, "Access token refreshed")
         );

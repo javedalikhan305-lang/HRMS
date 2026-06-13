@@ -1,8 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 export enum UserRole {
+    SUPER_ADMIN = 'SUPER_ADMIN',
     HR_ADMIN = 'HR_ADMIN',
     MANAGER = 'MANAGER',
     EMPLOYEE = 'EMPLOYEE'
@@ -20,6 +22,8 @@ export interface IUser extends Document {
     isEmailVerified: boolean;
     isActive: boolean;
     employeeId?: string; // Auto-generated internal ID
+    createdAt?: Date;
+    updatedAt?: Date;
     
     // Auth Methods
     comparePassword(password: string): Promise<boolean>;
@@ -79,7 +83,7 @@ UserSchema.methods.generateAccessToken = function() {
             role: this.role,
             tenantId: this.tenantId
         },
-        process.env.ACCESS_TOKEN_SECRET || 'access_secret',
+        env.accessTokenSecret,
         { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY || '15m') as any }
     );
 };
@@ -87,7 +91,7 @@ UserSchema.methods.generateAccessToken = function() {
 UserSchema.methods.generateRefreshToken = function() {
     return jwt.sign(
         { _id: this._id },
-        process.env.REFRESH_TOKEN_SECRET || 'refresh_secret',
+        env.refreshTokenSecret,
         { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY || '7d') as any }
     );
 };

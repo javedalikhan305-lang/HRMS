@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { User } from '../models/user.model';
 import { Attendance } from '../models/attendance.model';
-import { LeaveRequest } from '../models/leave.model';
+import { Leave } from '../models/leave.model';
 import { Employee } from '../models/employee.model';
 import { Payroll } from '../models/payroll.model';
 import ExcelJS from 'exceljs';
@@ -63,14 +63,14 @@ export class ReportService {
             tenantId: tenantObjectId 
         }).sort({ date: -1 });
 
-        const leaves = await LeaveRequest.find({
+        const leaves = await Leave.find({
             userId: userObjectId,
             tenantId: tenantObjectId
         });
 
         const totalWorkedDays = attendance.filter(a => a.status === 'Present' || a.status === 'Late').length;
         const totalLateDays = attendance.filter(a => a.status === 'Late').length;
-        const totalLeaveDays = leaves.filter(l => l.status === 'Approved').reduce((acc, curr) => acc + (curr.duration || 0), 0);
+        const totalLeaveDays = leaves.filter((l) => l.status === 'Approved').reduce((acc, curr) => acc + (curr.totalDays || 0), 0);
         
         const avgWorkHours = attendance.length > 0 
             ? attendance.reduce((acc, curr) => acc + (curr.workHours || 0), 0) / attendance.length 
@@ -128,11 +128,11 @@ export class ReportService {
             { $limit: 6 }
         ]);
 
-        const leaveTrend = await LeaveRequest.aggregate([
+        const leaveTrend = await Leave.aggregate([
             { $match: { tenantId: tenantObjectId, status: 'Approved' } },
             { $group: { 
                 _id: { $dateToString: { format: "%Y-%m", date: "$startDate" } },
-                totalDays: { $sum: "$duration" }
+                totalDays: { $sum: "$totalDays" }
             }},
             { $sort: { "_id": 1 } },
             { $limit: 6 }
@@ -140,7 +140,7 @@ export class ReportService {
 
         return {
             attendanceTrend: attendanceTrend.map(a => ({ month: a._id, hours: a.avgWorkHours.toFixed(1) })),
-            leaveTrend: leaveTrend.map(l => ({ month: l._id, days: l.totalDays }))
+            leaveTrend: leaveTrend.map((l: { _id: string; totalDays: number }) => ({ month: l._id, days: l.totalDays }))
         };
     }
 

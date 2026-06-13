@@ -1,37 +1,40 @@
+# HRMS Render Blueprint
+# Deploy: Render Dashboard → New → Blueprint → connect this GitHub repo
 services:
-  # Backend API Service
   - type: web
     name: hrms-backend
     runtime: node
     region: oregon
+    plan: free
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5000
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: CORS_ORIGIN
-        sync: false
+        value: https://hrms-frontend.onrender.com
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: GROQ_API_KEY
+        sync: false
 
-  # Frontend Static Site
   - type: web
     name: hrms-frontend
     runtime: static
+    plan: free
     rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    buildCommand: npm install --include=dev && npm run build
+    staticPublishPath: ./dist
     headers:
       - path: /*
         name: Cache-Control
@@ -42,4 +45,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false
+        value: https://hrms-backend.onrender.com/api/v1

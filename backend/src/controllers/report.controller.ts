@@ -39,7 +39,7 @@ export const downloadAttendanceReport = asyncHandler(async (req: AuthRequest, re
 export const getEmployeeStats = asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) throw new Error('Unauthorized');
     const { userId } = req.params;
-    const stats = await reportService.getEmployeeStats(req.user.tenantId.toString(), userId);
+    const stats = await reportService.getEmployeeStats(req.user.tenantId.toString(), userId as string);
     return res.status(200).json(new ApiResponse(200, stats));
 });
 

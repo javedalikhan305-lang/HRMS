@@ -85,7 +85,7 @@ export class EmployeeService {
                 tenantId: user.tenantId,
                 department: null,
                 designation: null,
-                joiningDate: user.createdAt,
+                joiningDate: user.createdAt ?? new Date(),
                 documents: [],
                 bankDetails: {},
                 address: {}

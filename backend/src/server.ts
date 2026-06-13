@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 import app from './app';
 import dotenv from 'dotenv';
+import { env } from './config/env';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hrms-pro';
 
 process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
@@ -13,7 +13,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(env.mongoUri)
     .then(() => {
         console.log('✅ MongoDB Connected Successfully');
         const server = app.listen(Number(PORT), '0.0.0.0', () => {

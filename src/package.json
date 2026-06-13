@@ -1,0 +1,8 @@
+{
+  "name": "hrms-deploy",
+  "private": true,
+  "scripts": {
+    "build": "cd ../frontend && npm install --include=dev && npm run build",
+    "start": "cd ../backend && npm install --include=dev && npm run build && npm start"
+  }
+}
