@@ -43,8 +43,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-// Root Route
-app.get('/', (req: Request, res: Response) => {
+// API Root Route
+app.get('/api', (req: Request, res: Response) => {
     res.status(200).json({
         message: 'Welcome to HRMS PRO API',
         version: '1.0.0'
