@@ -1,10 +1,10 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import path from 'path';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { ApiError } from './utils/ApiError';
 import { env } from './config/env';
@@ -22,6 +22,7 @@ import workflowRoutes from './routes/workflow.routes';
 import reportRoutes from './routes/report.routes';
 import aiRoutes from './routes/ai.routes';
 
+
 dotenv.config();
 
 const app: Application = express();
@@ -29,6 +30,7 @@ const app: Application = express();
 app.set('trust proxy', 1);
 
 // Middlewares
+// app.use(helmet());
 app.use(cors({
     origin: env.corsOrigin
         ? env.corsOrigin.split(',').map((origin) => origin.trim())
@@ -40,6 +42,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+
+// Root Route
+app.get('/', (req: Request, res: Response) => {
+    res.status(200).json({
+        message: 'Welcome to HRMS PRO API',
+        version: '1.0.0'
+    });
+});
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {
@@ -65,16 +75,18 @@ app.use('/api/v1/workflows', workflowRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/ai', aiRoutes);
 
-// ✅ Frontend static files serve karo
-const frontendPath = path.join(__dirname, '../../frontend/dist');
-app.use(express.static(frontendPath));
 
-// ✅ API 404 ya frontend index.html
-app.get('*', (req: Request, res: Response, next: NextFunction) => {
-    if (req.originalUrl.startsWith('/api/')) {
-        return next(new ApiError(404, `Can't find ${req.originalUrl} on this server!`));
-    }
-    res.sendFile(path.join(frontendPath, 'index.html'));
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
+// Error Handling for undefined API routes
+app.all('/api/*', (req: Request, res: Response, next: NextFunction) => {
+    next(new ApiError(404, `Can't find api route ${req.originalUrl} on this server!`));
+});
+
+// Redirect any other route to frontend
+app.get('*', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
 
 // Global Error Handler
