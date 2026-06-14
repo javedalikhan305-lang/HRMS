@@ -1,12 +1,10 @@
 const getApiBaseUrl = () => {
-    if (import.meta.env.PROD) {
-        return `${window.location.origin}/api/v1`;
+    // If we are NOT on localhost, use relative path for production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return '/api/v1';
     }
 
-    if (import.meta.env.VITE_API_BASE_URL) {
-        return import.meta.env.VITE_API_BASE_URL;
-    }
-
+    // Otherwise use local backend URL
     return 'http://localhost:5000/api/v1';
 };
 
