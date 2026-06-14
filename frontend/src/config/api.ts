@@ -1,6 +1,6 @@
 const getApiBaseUrl = () => {
     if (import.meta.env.PROD) {
-        return '/api/v1';
+        return `${window.location.origin}/api/v1`;
     }
 
     if (import.meta.env.VITE_API_BASE_URL) {
