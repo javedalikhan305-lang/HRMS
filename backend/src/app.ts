@@ -80,12 +80,12 @@ app.use('/api/v1/ai', aiRoutes);
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
 // Error Handling for undefined API routes
-app.all('/api/*', (req: Request, res: Response, next: NextFunction) => {
+app.all('/api/*path', (req: Request, res: Response, next: NextFunction) => {
     next(new ApiError(404, `Can't find api route ${req.originalUrl} on this server!`));
 });
 
 // Redirect any other route to frontend
-app.get('*', (req: Request, res: Response) => {
+app.get('*path', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
 
