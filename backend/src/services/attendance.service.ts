@@ -6,16 +6,16 @@ import moment from 'moment';
 
 export class AttendanceService {
     async punchIn(userId: string, tenantId: string, punchData: any) {
-        const today = moment().startOf('day').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
         const employee = await Employee.findOne({ userId, tenantId }).populate('shift');
         if (!employee) throw new ApiError(404, "Employee profile not found. Please ensure profile is complete.");
 
         let status: any = 'Present';
-        const now = moment();
+        const now = moment().utcOffset('+05:30');
         const shift = employee.shift as any;
         const shiftStartTimeString = shift?.startTime || "09:00";
         const gracePeriod = shift?.gracePeriod || 15;
-        const shiftStart = moment(shiftStartTimeString, "HH:mm");
+        const shiftStart = moment(shiftStartTimeString, "HH:mm").utcOffset('+05:30', true);
         const graceTime = shiftStart.clone().add(gracePeriod, 'minutes');
 
         if (now.isAfter(graceTime)) {
@@ -45,7 +45,7 @@ export class AttendanceService {
     }
 
     async punchOut(userId: string, tenantId: string, punchData: any) {
-        const today = moment().startOf('day').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
         const attendance = await Attendance.findOne({ userId, date: today, tenantId });
         if (!attendance || !attendance.punchIn) {
             throw new ApiError(400, "No active check-in session found for today. Please punch-in first.");
@@ -72,8 +72,8 @@ export class AttendanceService {
         const query: any = { tenantId };
         if (filter.userId) query.userId = filter.userId;
         if (filter.month && filter.year) {
-            const startOfMonth = moment([filter.year, filter.month - 1]).startOf('month').toDate();
-            const endOfMonth = moment([filter.year, filter.month - 1]).endOf('month').toDate();
+            const startOfMonth = moment([filter.year, filter.month - 1]).utcOffset('+05:30').startOf('month').toDate();
+            const endOfMonth = moment([filter.year, filter.month - 1]).utcOffset('+05:30').endOf('month').toDate();
             query.date = { $gte: startOfMonth, $lte: endOfMonth };
         }
         return await Attendance.find(query)
@@ -87,7 +87,7 @@ export class AttendanceService {
 
     async markManualAttendance(tenantId: string, data: any) {
         const { userId, date, status, punchIn, punchOut } = data;
-        const attendanceDate = moment(date).startOf('day').toDate();
+        const attendanceDate = moment(date).utcOffset('+05:30').startOf('day').toDate();
         const punchInDate = punchIn ? new Date(`${date}T${punchIn}`) : undefined;
         const punchOutDate = punchOut ? new Date(`${date}T${punchOut}`) : undefined;
         
@@ -114,7 +114,7 @@ export class AttendanceService {
     }
 
     async getTodayAttendance(tenantId: string) {
-        const today = moment().startOf('day').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
         return await Attendance.find({ 
             tenantId, 
             date: today 
