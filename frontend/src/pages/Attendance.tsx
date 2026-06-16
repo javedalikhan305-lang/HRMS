@@ -128,8 +128,19 @@ const Attendance = () => {
         }
     });
 
-    const todayRecord = history?.find((h: any) => moment(h.date).isSame(moment(), 'day'));
-    const presentDays = history?.filter((h: any) => h.status === 'Present' || h.status === 'Late').length || 0;
+    const todayRecord = history?.find((h: any) => {
+        const isToday = moment(h.date).isSame(moment(), 'day');
+        const hUserId = h.userId?._id || h.userId;
+        return isToday && hUserId === user?._id;
+    });
+    
+    // Filter history for personal timeline log
+    const personalHistory = history?.filter((h: any) => {
+        const hUserId = h.userId?._id || h.userId;
+        return hUserId === user?._id;
+    }) || [];
+    
+    const presentDays = personalHistory.filter((h: any) => h.status === 'Present' || h.status === 'Late').length || 0;
 
     const stats = [
         { label: 'Today In', value: todayRecord?.punchIn ? moment(todayRecord.punchIn).format('hh:mm A') : '--:--', icon: Clock, color: 'text-primary' },
@@ -308,7 +319,7 @@ const Attendance = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-secondary/30">
-                                    {(history || []).map((log: any) => (
+                                    {personalHistory.map((log: any) => (
                                         <tr key={log._id} className="hover:bg-secondary/10 transition-colors group">
                                             <td className="px-10 py-7 font-black text-sm">{moment(log.date).format('DD MMM, YYYY')}</td>
                                             <td className="px-10 py-7">
