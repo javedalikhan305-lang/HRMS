@@ -126,12 +126,12 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, on
             return;
         }
 
-        // Sanitize data: replace empty strings with null for backend
+        // Sanitize data: ensure we send clean strings for IDs
         const sanitizedUserData = { ...formData.userData };
         const sanitizedEmployeeData = { 
             ...formData.employeeData,
-            department: formData.employeeData.department || null,
-            designation: formData.employeeData.designation || null
+            department: formData.employeeData.department || undefined,
+            designation: formData.employeeData.designation || undefined
         };
 
         try {
@@ -340,7 +340,9 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, on
                                                 onChange={(e) => setFormData({...formData, employeeData: {...formData.employeeData, department: e.target.value}})}
                                                 className="w-full bg-secondary/40 border-none rounded-2xl py-4 pl-12 pr-10 text-sm font-bold focus:ring-2 ring-primary/40 appearance-none cursor-pointer"
                                             >
-                                                <option value="" className="text-muted-foreground">Select Department</option>
+                                                <option value="" className="text-muted-foreground">
+                                                    {fetchingData ? 'Loading Departments...' : 'Select Department'}
+                                                </option>
                                                 {departments.map(dept => (
                                                     <option key={dept._id} value={dept._id} className="text-foreground">{dept.name}</option>
                                                 ))}
@@ -376,7 +378,9 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, on
                                                 onChange={(e) => setFormData({...formData, employeeData: {...formData.employeeData, designation: e.target.value}})}
                                                 className="w-full bg-secondary/40 border-none rounded-2xl py-4 pl-12 pr-10 text-sm font-bold focus:ring-2 ring-primary/40 appearance-none cursor-pointer"
                                             >
-                                                <option value="" className="text-muted-foreground">Select Designation</option>
+                                                <option value="" className="text-muted-foreground">
+                                                    {fetchingData ? 'Loading Designations...' : 'Select Designation'}
+                                                </option>
                                                 {designations.map(desig => (
                                                     <option key={desig._id} value={desig._id} className="text-foreground">{desig.title}</option>
                                                 ))}

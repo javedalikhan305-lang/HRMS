@@ -15,10 +15,25 @@ export class EmployeeService {
                 throw new ApiError(400, "A user with this email already exists in the system");
             }
 
-            const employeeCount = await User.countDocuments({ tenantId });
+            // Find the highest sequence number for this year to avoid duplicates
             const year = new Date().getFullYear();
-            const sequence = String(employeeCount + 1).padStart(4, '0');
-            const generatedEmployeeId = `EMP-${year}-${sequence}`;
+            const yearPrefix = `EMP-${year}-`;
+            
+            const lastUser = await User.findOne({ 
+                tenantId, 
+                employeeId: new RegExp(`^${yearPrefix}`) 
+            }).sort({ employeeId: -1 });
+
+            let nextSequence = 1;
+            if (lastUser && lastUser.employeeId) {
+                const lastSequence = parseInt(lastUser.employeeId.split('-')[2]);
+                if (!isNaN(lastSequence)) {
+                    nextSequence = lastSequence + 1;
+                }
+            }
+
+            const sequence = String(nextSequence).padStart(4, '0');
+            const generatedEmployeeId = `${yearPrefix}${sequence}`;
 
             const newUser = new User({
                 firstName: userData.firstName,

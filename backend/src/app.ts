@@ -2,6 +2,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -30,7 +31,38 @@ const app: Application = express();
 app.set('trust proxy', 1);
 
 // Middlewares
-// app.use(helmet());
+app.use(helmet());
+
+// Global Rate Limiter: 100 requests per 15 minutes
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 'error',
+        message: 'Too many requests from this IP, please try again after 15 minutes'
+    }
+});
+
+// Apply global rate limiter to all routes
+app.use('/api', globalLimiter);
+
+// Auth Rate Limiter: 10 attempts per 15 minutes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 'error',
+        message: 'Too many login attempts, please try again after 15 minutes'
+    }
+});
+
+// Apply stricter limit to auth routes
+app.use('/api/v1/auth', authLimiter);
+
 app.use(cors({
     origin: env.corsOrigin
         ? env.corsOrigin.split(',').map((origin) => origin.trim())

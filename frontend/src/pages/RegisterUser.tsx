@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
     UserPlus, Mail, Lock, Shield, 
     User, Building2, Briefcase, Calendar, 
@@ -24,6 +24,10 @@ const RegisterUser = () => {
 
     const [departments, setDepartments] = useState<any[]>([]);
     const [designations, setDesignations] = useState<any[]>([]);
+
+    const [showQuickAdd, setShowQuickAdd] = useState<'none' | 'dept' | 'desig'>('none');
+    const [quickAddValue, setQuickAddValue] = useState('');
+    const [quickAddLoading, setQuickAddLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         userData: {
@@ -71,6 +75,38 @@ const RegisterUser = () => {
         }
     };
 
+    const handleQuickAdd = async () => {
+        if (!quickAddValue.trim()) return;
+        setQuickAddLoading(true);
+        try {
+            if (showQuickAdd === 'dept') {
+                const res = await api.post('/org/departments', { name: quickAddValue });
+                const newDept = res.data.data;
+                setDepartments(prev => [...prev, newDept]);
+                setFormData(prev => ({
+                    ...prev,
+                    employeeData: { ...prev.employeeData, department: newDept._id }
+                }));
+                toast.success(`Department "${quickAddValue}" added!`);
+            } else if (showQuickAdd === 'desig') {
+                const res = await api.post('/org/designations', { title: quickAddValue });
+                const newDesig = res.data.data;
+                setDesignations(prev => [...prev, newDesig]);
+                setFormData(prev => ({
+                    ...prev,
+                    employeeData: { ...prev.employeeData, designation: newDesig._id }
+                }));
+                toast.success(`Designation "${quickAddValue}" added!`);
+            }
+            setShowQuickAdd('none');
+            setQuickAddValue('');
+        } catch (err) {
+            toast.error("Failed to add. Ensure name is unique.");
+        } finally {
+            setQuickAddLoading(false);
+        }
+    };
+
     const validateForm = () => {
         const { userData, employeeData } = formData;
         if (!userData.firstName || !userData.lastName || !userData.email) return "Please fill in all required user fields.";
@@ -90,10 +126,17 @@ const RegisterUser = () => {
             return;
         }
 
+        const { userData, employeeData } = formData;
+        const sanitizedEmployeeData = { 
+            ...employeeData,
+            department: employeeData.department || undefined,
+            designation: employeeData.designation || undefined
+        };
+
         try {
             setLoading(true);
             setError(null);
-            await employeeService.addEmployee(formData.userData, formData.employeeData);
+            await employeeService.addEmployee(userData, sanitizedEmployeeData);
             setSuccess(true);
             toast.success("Employee registered successfully!");
             setTimeout(() => {
@@ -272,7 +315,16 @@ const RegisterUser = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department</label>
+                            <div className="flex items-center justify-between ml-1">
+                                <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Department</label>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowQuickAdd(showQuickAdd === 'dept' ? 'none' : 'dept')}
+                                    className="text-[10px] font-black text-primary uppercase flex items-center hover:underline"
+                                >
+                                    + Quick Add
+                                </button>
+                            </div>
                             <div className="relative">
                                 <Building2 className="absolute left-4 top-4 text-muted-foreground" size={18} />
                                 <select 
@@ -281,7 +333,7 @@ const RegisterUser = () => {
                                     onChange={(e) => setFormData({...formData, employeeData: {...formData.employeeData, department: e.target.value}})}
                                     className="w-full bg-secondary/30 border-none rounded-2xl py-4 pl-12 pr-10 text-sm font-bold appearance-none cursor-pointer focus:ring-2 ring-primary/40 transition-all"
                                 >
-                                    <option value="">Select Domain</option>
+                                    <option value="">{fetchingData ? 'Loading...' : 'Select Domain'}</option>
                                     {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
                                 </select>
                                 <ChevronRight className="absolute right-4 top-4 rotate-90 text-muted-foreground pointer-events-none" size={20} />
@@ -289,7 +341,16 @@ const RegisterUser = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Designation</label>
+                            <div className="flex items-center justify-between ml-1">
+                                <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Designation</label>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowQuickAdd(showQuickAdd === 'desig' ? 'none' : 'desig')}
+                                    className="text-[10px] font-black text-primary uppercase flex items-center hover:underline"
+                                >
+                                    + Quick Add
+                                </button>
+                            </div>
                             <div className="relative">
                                 <Briefcase className="absolute left-4 top-4 text-muted-foreground" size={18} />
                                 <select 
@@ -298,7 +359,7 @@ const RegisterUser = () => {
                                     onChange={(e) => setFormData({...formData, employeeData: {...formData.employeeData, designation: e.target.value}})}
                                     className="w-full bg-secondary/30 border-none rounded-2xl py-4 pl-12 pr-10 text-sm font-bold appearance-none cursor-pointer focus:ring-2 ring-primary/40 transition-all"
                                 >
-                                    <option value="">Select Rank</option>
+                                    <option value="">{fetchingData ? 'Loading...' : 'Select Rank'}</option>
                                     {designations.map(d => <option key={d._id} value={d._id}>{d.title}</option>)}
                                 </select>
                                 <ChevronRight className="absolute right-4 top-4 rotate-90 text-muted-foreground pointer-events-none" size={20} />
@@ -333,6 +394,44 @@ const RegisterUser = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Quick Add Overlay */}
+                    <AnimatePresence>
+                        {showQuickAdd !== 'none' && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="mt-8 p-6 bg-primary/5 border border-primary/20 rounded-[2rem] space-y-4"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-primary">
+                                        Quick Add {showQuickAdd === 'dept' ? 'Department' : 'Designation'}
+                                    </h4>
+                                    <button type="button" onClick={() => setShowQuickAdd('none')} className="text-muted-foreground hover:text-primary"><AlertCircle size={18}/></button>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        autoFocus
+                                        value={quickAddValue}
+                                        onChange={(e) => setQuickAddValue(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleQuickAdd())}
+                                        placeholder={`Enter ${showQuickAdd === 'dept' ? 'name' : 'title'}...`}
+                                        className="flex-1 bg-background border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 ring-primary/40 transition-all"
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={handleQuickAdd}
+                                        disabled={quickAddLoading || !quickAddValue.trim()}
+                                        className="bg-primary text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center min-w-[80px]"
+                                    >
+                                        {quickAddLoading ? <Loader2 className="animate-spin" size={14}/> : 'Add'}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.section>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 py-8">

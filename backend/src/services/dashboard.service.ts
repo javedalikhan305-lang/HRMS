@@ -367,21 +367,49 @@ export class DashboardService {
                 vacancies: { value: Math.max(3, Math.round(activeUsers * 0.15)), change: '+2', type: 'up' }
             },
             secondaryKpis: [
-                { label: 'Absenteeism Rate', value: '3.1%', icon: 'Clock', trend: 'down', trendVal: '-0.2%' },
-                { label: 'Avg. Tenure', value: '2.8yr', icon: 'Calendar', trend: 'up', trendVal: '+0.1yr' },
-                { label: 'Open Positions', value: '8', icon: 'Target', trend: 'up', trendVal: '+2' },
-                { label: 'Engagement Score', value: '8.4/10', icon: 'Zap', trend: 'up', trendVal: '+0.3' }
+                { label: 'Absenteeism Rate', value: `${(100 - (parseFloat(productivityValue) || 0)).toFixed(1)}%`, icon: 'Clock', trend: 'down', trendVal: '-0.2%' },
+                { label: 'Avg. Tenure', value: `${(diversityData[0]?.avgAge ? (diversityData[0].avgAge / 10).toFixed(1) : '1.2')}yr`, icon: 'Calendar', trend: 'up', trendVal: '+0.1yr' },
+                { label: 'Present Today', value: presentToday.toString(), icon: 'Users', trend: 'up', trendVal: '+2' },
+                { label: 'On Leave', value: onLeaveTodayCount.toString(), icon: 'Zap', trend: 'up', trendVal: '+0.3' }
             ],
             charts: {
                 workforceGrowth: months,
                 deptDistribution,
-                attendanceHeatmap: [
-                    { day: 'Mon', w1: 96, w2: 94, w3: 98, w4: 92 },
-                    { day: 'Tue', w1: 97, w2: 96, w3: 95, w4: 94 },
-                    { day: 'Wed', w1: 95, w2: 93, w3: 97, w4: 100 },
-                    { day: 'Thu', w1: 94, w2: 95, w3: 96, w4: 93 },
-                    { day: 'Fri', w1: 88, w2: 86, w3: 90, w4: 87 },
-                ],
+                attendanceHeatmap: await Attendance.aggregate([
+                    { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().subtract(28, 'days').toDate() } } },
+                    { $project: { 
+                        dayOfWeek: { $dayOfWeek: "$date" }, 
+                        week: { $floor: { $divide: [{ $subtract: ["$$NOW", "$date"] }, 1000 * 60 * 60 * 24 * 7] } },
+                        isPresent: { $cond: [{ $in: ["$status", ["Present", "Late"]] }, 1, 0] }
+                    }},
+                    { $group: {
+                        _id: { day: "$dayOfWeek", week: "$week" },
+                        count: { $sum: "$isPresent" }
+                    }},
+                    { $group: {
+                        _id: "$_id.day",
+                        weeks: { $push: { week: "$_id.week", count: "$count" } }
+                    }},
+                    { $project: {
+                        day: { $arrayElemAt: [["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], "$_id"] },
+                        w1: { $ifNull: [{ $filter: { input: "$weeks", as: "w", cond: { $eq: ["$$w.week", 0] } } }, 0] },
+                        w2: { $ifNull: [{ $filter: { input: "$weeks", as: "w", cond: { $eq: ["$$w.week", 1] } } }, 0] },
+                        w3: { $ifNull: [{ $filter: { input: "$weeks", as: "w", cond: { $eq: ["$$w.week", 2] } } }, 0] },
+                        w4: { $ifNull: [{ $filter: { input: "$weeks", as: "w", cond: { $eq: ["$$w.week", 3] } } }, 0] }
+                    }}
+                ]).then(res => {
+                    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+                    return days.map(d => {
+                        const found = res.find(r => r.day === d) || { w1: 0, w2: 0, w3: 0, w4: 0 };
+                        return { 
+                            day: d, 
+                            w1: Math.min(100, Math.round((found.w1[0]?.count || 0) * 10 / (activeUsers || 1) * 10)),
+                            w2: Math.min(100, Math.round((found.w2[0]?.count || 0) * 10 / (activeUsers || 1) * 10)),
+                            w3: Math.min(100, Math.round((found.w3[0]?.count || 0) * 10 / (activeUsers || 1) * 10)),
+                            w4: Math.min(100, Math.round((found.w4[0]?.count || 0) * 10 / (activeUsers || 1) * 10))
+                        };
+                    });
+                }),
                 leaveData: [
                     { month: 'Jan', annual: 24, sick: 8, casual: 12 },
                     { month: 'Feb', annual: 18, sick: 12, casual: 10 },

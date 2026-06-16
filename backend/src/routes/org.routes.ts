@@ -21,24 +21,25 @@ import {
 } from '../controllers/org.controller';
 import { verifyJWT, authorizeRoles } from '../middlewares/auth.middleware';
 import { UserRole } from '../models/user.model';
+import { cacheMiddleware } from '../middlewares/cache.middleware';
 
 const router = Router();
 
 router.use(verifyJWT);
 
 // Dashboard stats & Charts
-router.get('/dashboard-stats', authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN, UserRole.MANAGER), getDashboardStats);
-router.get('/personal-stats', getPersonalStats);
-router.get('/manager-stats', authorizeRoles(UserRole.MANAGER, UserRole.HR_ADMIN, UserRole.SUPER_ADMIN), getManagerStats);
-router.get('/executive-stats', authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getExecutiveStats);
-router.get('/chart', authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getOrgChart);
+router.get('/dashboard-stats', cacheMiddleware(300), authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN, UserRole.MANAGER), getDashboardStats);
+router.get('/personal-stats', cacheMiddleware(300), getPersonalStats);
+router.get('/manager-stats', cacheMiddleware(300), authorizeRoles(UserRole.MANAGER, UserRole.HR_ADMIN, UserRole.SUPER_ADMIN), getManagerStats);
+router.get('/executive-stats', cacheMiddleware(300), authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getExecutiveStats);
+router.get('/chart', cacheMiddleware(600), authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getOrgChart);
 
-router.get('/metrics', authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getOrgMetrics);
+router.get('/metrics', cacheMiddleware(300), authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN), getOrgMetrics);
 
 // Information fetching (generally available to authenticated users)
-router.get('/departments', getDepartments);
-router.get('/designations', getDesignations);
-router.get('/shifts', getShifts);
+router.get('/departments', cacheMiddleware(10), getDepartments);
+router.get('/designations', cacheMiddleware(10), getDesignations);
+router.get('/shifts', cacheMiddleware(10), getShifts);
 
 // Admin-only management routes
 router.use(authorizeRoles(UserRole.SUPER_ADMIN, UserRole.HR_ADMIN));
