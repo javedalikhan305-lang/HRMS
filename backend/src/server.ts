@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+process.env.TZ = 'Asia/Kolkata'; // Force timezone to IST for production environment (Render/Live)
 
 // Override system DNS to fix ESERVFAIL on MongoDB Atlas SRV records
 import dns from 'dns';
