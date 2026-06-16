@@ -25,8 +25,10 @@ export class EmployeeService {
             }).sort({ employeeId: -1 });
 
             let nextSequence = 1;
-            if (lastUser && lastUser.employeeId) {
-                const lastSequence = parseInt(lastUser.employeeId.split('-')[2]);
+            const lastEmpId: string | undefined = lastUser?.employeeId;
+            if (lastEmpId && typeof lastEmpId === 'string') {
+                const parts = lastEmpId.split('-');
+                const lastSequence = parseInt(parts[2] || '0', 10);
                 if (!isNaN(lastSequence)) {
                     nextSequence = lastSequence + 1;
                 }
