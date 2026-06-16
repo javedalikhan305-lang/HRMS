@@ -68,6 +68,34 @@ const ExecutiveDashboard = () => {
 
     const { kpis, charts, aiInsights, diversity } = data;
 
+    const handleDownload = () => {
+        const rows = [
+            ["Executive Dashboard Intelligence Report", moment().format('YYYY-MM-DD HH:mm')],
+            [],
+            ["Primary KPIs"],
+            ["Metric", "Value", "Growth"],
+            ["Total Headcount", kpis.totalHeadcount.value, kpis.totalHeadcount.change],
+            ["New Hires", kpis.headcountGrowth.value, kpis.headcountGrowth.change],
+            ["Attrition Rate", kpis.attritionRate.value, kpis.attritionRate.change],
+            ["Productivity Index", kpis.productivityIndex.value, kpis.productivityIndex.change],
+            [],
+            ["Departmental Headcount"],
+        ];
+
+        charts.deptDistribution.forEach((d: any) => rows.push([d.name, d.value]));
+
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + rows.map(e => e.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Executive_Insights_${moment().format('YYYYMMDD')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="space-y-6 pb-10 max-w-[1600px] mx-auto">
             {/* Header */}
@@ -83,7 +111,10 @@ const ExecutiveDashboard = () => {
                     <button onClick={fetchData} className="p-3 bg-secondary rounded-2xl hover:text-primary transition-all shadow-sm">
                         <RefreshCw size={18} />
                     </button>
-                    <button className="bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center space-x-2 shadow-lg hover:opacity-90 transition-all">
+                    <button 
+                        onClick={handleDownload}
+                        className="bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center space-x-2 shadow-lg hover:opacity-90 transition-all"
+                    >
                         <Download size={14} />
                         <span>Download Info</span>
                     </button>
@@ -93,7 +124,7 @@ const ExecutiveDashboard = () => {
             {/* Main Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard icon={Users} label="Total Employees" value={kpis.totalHeadcount.value} change={kpis.totalHeadcount.change} changeType={kpis.totalHeadcount.type} color="bg-blue-500" delay={0.1} />
-                <KPICard icon={TrendingUp} label="New Employees" value={kpis.headcountGrowth.value} change="+2.4%" changeType="up" color="bg-emerald-500" delay={0.2} />
+                <KPICard icon={TrendingUp} label="New Employees" value={kpis.headcountGrowth.value} change={kpis.headcountGrowth.change} changeType={kpis.headcountGrowth.type} color="bg-emerald-500" delay={0.2} />
                 <KPICard icon={TrendingDown} label="Leaving Rate" value={kpis.attritionRate.value} change="-0.4%" changeType="up" color="bg-rose-500" delay={0.3} />
                 <KPICard icon={Activity} label="Productivity" value={kpis.productivityIndex.value} change="+1.2%" changeType="up" color="bg-amber-500" delay={0.4} />
             </div>
@@ -200,21 +231,21 @@ const ExecutiveDashboard = () => {
                     <motion.div initial={{opacity:0}} animate={{opacity:1}} className="bg-black text-white p-8 rounded-[2rem] relative overflow-hidden">
                         <Zap size={80} className="absolute -right-4 -bottom-4 opacity-10 rotate-12" />
                         <p className="text-[10px] font-bold uppercase opacity-50 tracking-widest mb-1">Team Satisfaction</p>
-                        <h4 className="text-3xl font-black">8.4/10</h4>
+                        <h4 className="text-3xl font-black">{kpis.teamSatisfaction?.value || '8.5/10'}</h4>
                         <p className="text-[10px] font-bold text-emerald-400 mt-4 flex items-center">
                             <TrendingUp size={12} className="mr-1" />
-                            +0.3 from last month
+                            {kpis.teamSatisfaction?.change || '+0.1'} from last month
                         </p>
                     </motion.div>
 
                     <div className="bg-card p-8 rounded-[2rem] border shadow-sm flex flex-col justify-between">
                         <div>
                             <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-1">Leave Rate</p>
-                            <h4 className="text-3xl font-black">3.1%</h4>
+                            <h4 className="text-3xl font-black">{kpis.leaveRate?.value || '0.0%'}</h4>
                         </div>
-                        <div className="flex items-center gap-2 text-rose-500 font-bold text-[10px]">
-                            <TrendingUp size={12} />
-                            <span>Action Needed</span>
+                        <div className={`flex items-center gap-2 font-bold text-[10px] ${kpis.leaveRate?.type === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {kpis.leaveRate?.type === 'up' ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                            <span>{kpis.leaveRate?.change || 'Normal'}</span>
                         </div>
                     </div>
 
@@ -225,7 +256,7 @@ const ExecutiveDashboard = () => {
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mb-1">Job Vacancies</p>
-                                <h4 className="text-xl font-black">12 Open Roles</h4>
+                                <h4 className="text-xl font-black">{kpis.vacancies?.value || '0'} Open Roles</h4>
                             </div>
                         </div>
                         <button className="p-3 bg-secondary rounded-xl hover:bg-primary hover:text-white transition-all">
