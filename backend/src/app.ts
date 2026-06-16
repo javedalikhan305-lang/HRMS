@@ -31,7 +31,17 @@ const app: Application = express();
 app.set('trust proxy', 1);
 
 // Middlewares
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            "img-src": ["'self'", "https:", "data:"],
+            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            "connect-src": ["'self'", "https:", "http:", "ws:", "wss:"]
+        }
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // Global Rate Limiter: 100 requests per 15 minutes
 const globalLimiter = rateLimit({
