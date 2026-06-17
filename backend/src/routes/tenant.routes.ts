@@ -6,9 +6,8 @@ import { UserRole } from '../models/user.model';
 const router = Router();
 
 router.use(verifyJWT);
-router.use(authorizeRoles(UserRole.HR_ADMIN));
 
 router.get('/config', getTenantConfig);
-router.patch('/config', updateTenantConfig);
+router.patch('/config', authorizeRoles(UserRole.HR_ADMIN), updateTenantConfig);
 
 export default router;

@@ -239,7 +239,7 @@ const Onboarding = () => {
                         <div className="space-y-6">
                             {[
                                 { name: 'IT Provisioning', type: 'System', items: '5/8', color: 'bg-blue-500' },
-                                { name: 'Finance Setup', type: 'Payroll', items: '3/4', color: 'bg-emerald-500' },
+                                { name: 'Finance Setup', type: 'Accounts', items: '3/4', color: 'bg-emerald-500' },
                                 { name: 'Company Values', type: 'Training', items: '1/6', color: 'bg-amber-500' },
                             ].map((check, i) => (
                                 <div key={i} className="flex items-center justify-between group cursor-pointer">

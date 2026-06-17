@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Clock, Calendar, Building2, FileText,
     Settings, LogOut, Menu, Bell, Moon, Sun, Wallet, X, ChevronRight,
-    FolderOpen, UserCircle, Search, HelpCircle, Zap, ShieldCheck, 
+    FolderOpen, UserCircle, Search, Zap, ShieldCheck, 
     Activity, UserPlus, GitBranch, Bot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -83,14 +83,12 @@ const DashboardLayout = () => {
             items: [
                 { icon: Clock, label: 'Time Tracking', to: '/dashboard/attendance' },
                 { icon: Calendar, label: 'Leave Master', to: '/dashboard/leave' },
-                { icon: Wallet, label: 'Payroll Hub', to: '/dashboard/payroll' },
                 { icon: GitBranch, label: 'Workflows', to: '/dashboard/workflows' },
             ]
         },
         {
             title: 'Intelligence',
             items: [
-                { icon: Zap, label: 'AI Assistant', to: '/dashboard/ai-assistant' },
                 { icon: FileText, label: 'Report Engine', to: '/dashboard/reports' },
                 { icon: Bell, label: 'Notifications', to: '/dashboard/notifications' },
             ]
@@ -125,9 +123,8 @@ const DashboardLayout = () => {
             ]
         },
         {
-            title: 'Finance',
+            title: 'Finance & Documents',
             items: [
-                { icon: Wallet, label: 'Payslips', to: '/dashboard/payroll' },
                 { icon: FolderOpen, label: 'Documents', to: '/dashboard/documents' },
             ]
         },
@@ -170,9 +167,8 @@ const DashboardLayout = () => {
             ]
         },
         {
-             title: 'Finance & Documents',
+             title: 'Collaboration',
              items: [
-                 { icon: Wallet, label: 'Payslips', to: '/dashboard/payroll' },
                  { icon: FolderOpen, label: 'Documents', to: '/dashboard/documents' },
              ]
         },
@@ -341,9 +337,6 @@ const DashboardLayout = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                        <button className="hidden md:flex items-center space-x-1 text-muted-foreground hover:text-foreground p-2 rounded-lg hover:bg-secondary transition-colors">
-                            <HelpCircle size={18} />
-                        </button>
                         <button onClick={toggleDarkMode} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
                             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                         </button>

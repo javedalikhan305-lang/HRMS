@@ -129,7 +129,7 @@ const Attendance = () => {
     });
 
     const todayRecord = history?.find((h: any) => {
-        const isToday = moment(h.date).isSame(moment(), 'day');
+        const isToday = moment(h.date).utcOffset('+05:30').isSame(moment().utcOffset('+05:30'), 'day');
         const hUserId = h.userId?._id || h.userId;
         return isToday && hUserId === user?._id;
     });

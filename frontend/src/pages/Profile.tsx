@@ -482,8 +482,8 @@ const Profile = () => {
                                     <div>
                                         <p className="text-sm font-black mb-1 text-amber-600 uppercase tracking-tight">Security Protocol</p>
                                         <p className="text-xs font-medium text-amber-700/70 leading-relaxed">
-                                            Banking changes require multi-factor authentication and will take 24-48 hours to be reflected in the payroll registry. 
-                                            Ensure all details are accurate to avoid payment delays.
+                                            Banking changes require multi-factor authentication and will take 24-48 hours to be reflected in the system registry. 
+                                            Ensure all details are accurate to avoid disbursement delays.
                                         </p>
                                     </div>
                                 </div>

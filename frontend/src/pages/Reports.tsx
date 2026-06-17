@@ -36,9 +36,6 @@ const Reports = () => {
     const [opsMetrics, setOpsMetrics] = useState<any>(null);
     const [loadingReports, setLoadingReports] = useState(true);
 
-    // Instant Insight States
-    const [isInsightLoading, setIsInsightLoading] = useState(false);
-    const [activeInsight, setActiveInsight] = useState<{title: string, content: string, action: string} | null>(null);
 
     useEffect(() => {
         fetchInitialData();
@@ -96,46 +93,10 @@ const Reports = () => {
         }
     };
 
-    const generateInstantInsight = async () => {
-        setIsInsightLoading(true);
-        // Simulate high-performance compute delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const insights: Record<string, any> = {
-            talent: {
-                title: "Talent Acquisition Velocity",
-                content: "Your hiring pipeline is currently performing 14% above the quarterly benchmark. The average 'time-to-hire' has decreased to 18 days for technical roles.",
-                action: "Recommend increasing screening capacity for the Engineering department to maintain momentum."
-            },
-            employee: {
-                title: "Workforce Engagement Pulse",
-                content: "Employee productivity stats show a strong upward trend in cross-departmental collaboration. Internal leave patterns suggest high morale in the Operations team.",
-                action: "Consider a mid-year recognition program for the top 5% most collaborative members."
-            },
-            ops: {
-                title: "Operational Efficiency Audit",
-                content: "Current attendance data shows a 98% consistency rate. Late markers have dropped significantly following the shift optimization implemented last month.",
-                action: "Audit the morning shift overlap to save an estimated 4.2% in administrative overhead."
-            },
-            finance: {
-                title: "Capital Disbursement Analysis",
-                content: "Payroll variance is exceptionally low at 1.2%. Bonus allocations are projected to be well within the 'Safe' threshold for the upcoming cycle.",
-                action: "Optimize currency conversion buffers for international contractors to save ~2k monthly."
-            },
-            risk: {
-                title: "System Integrity Report",
-                content: "Zero security anomalies detected. Role-based access control (RBAC) coverage is at 100% for all sensitive financial modules.",
-                action: "Schedule a routine quarterly audit of legacy permissions for 3 inactive managers."
-            }
-        };
-
-        setActiveInsight(insights[activeDomain] || insights.talent);
-        setIsInsightLoading(false);
-    };
 
     const reportArchive = [
         { title: 'Global Headcount & Attrition Q2', type: 'Strategic', date: 'June 2024', status: 'Verified' },
-        { title: 'Payroll Variance Analysis', type: 'Financial', date: 'June 2024', status: 'Processing' },
+        { title: 'Expense Variance Analysis', type: 'Financial', date: 'June 2024', status: 'Processing' },
         { title: 'Annual Tax Compliance Audit', type: 'Regulatory', date: 'FY 2023-24', status: 'Verified' },
         { title: 'Diversity & Inclusion Pulse', type: 'Cultural', date: 'May 2024', status: 'Draft' },
     ];
@@ -160,14 +121,6 @@ const Reports = () => {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <button 
-                        onClick={generateInstantInsight}
-                        disabled={isInsightLoading}
-                        className="bg-primary text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-primary/20 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isInsightLoading ? <Loader2 className="animate-spin" size={14} /> : <Zap size={14} />}
-                        <span>{isInsightLoading ? 'Analyzing...' : 'Instant Insight'}</span>
-                    </button>
                     <button className="p-4 bg-secondary/50 rounded-2xl hover:bg-foreground hover:text-white transition-all shadow-sm">
                         <Share2 size={18} />
                     </button>
@@ -616,63 +569,6 @@ const Reports = () => {
                 </AnimatePresence>
             </main>
 
-            {/* Instant Insight Modal Overlay */}
-            <AnimatePresence>
-                {activeInsight && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-md"
-                        onClick={() => setActiveInsight(null)}
-                    >
-                        <motion.div 
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-card border rounded-[3.5rem] p-12 max-w-2xl w-full shadow-2xl relative overflow-hidden"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-indigo-500" />
-                            
-                            <div className="flex items-center space-x-4 mb-8">
-                                <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center">
-                                    <Zap size={32} className="text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-1">Strategic Intelligence</p>
-                                    <h2 className="text-3xl font-black tracking-tighter">{activeInsight.title}</h2>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="p-8 bg-secondary/30 rounded-[2.5rem] border border-secondary/50">
-                                    <p className="text-sm font-medium leading-relaxed text-foreground/80 italic">
-                                        "{activeInsight.content}"
-                                    </p>
-                                </div>
-
-                                <div className="p-8 border-2 border-primary/20 border-dashed rounded-[2.5rem] bg-primary/5">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-3 flex items-center">
-                                        <TrendingUp size={12} className="mr-2" />
-                                        Recommended Action
-                                    </h4>
-                                    <p className="text-sm font-black tracking-tight leading-relaxed">
-                                        {activeInsight.action}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <button 
-                                onClick={() => setActiveInsight(null)}
-                                className="w-full mt-10 p-5 bg-black text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-xl"
-                            >
-                                Acknowledge & Dismiss
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

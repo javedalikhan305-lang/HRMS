@@ -6,7 +6,7 @@ import moment from 'moment';
 import { 
     Clock, Calendar, FileText, TrendingUp, 
     Sparkles, Zap, CalendarDays, Briefcase, Plane, UserCheck, LayoutDashboard,
-    Wallet, Loader2
+    Loader2, Building2, UserCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ManagerDashboard from './ManagerDashboard';
@@ -45,10 +45,10 @@ const EmployeeDashboard = () => {
     const stats = [
         { 
             label: 'Today Punch', 
-            value: (statsData?.recentLogs?.[0]?.date && moment(statsData.recentLogs[0].date).isSame(moment(), 'day')) 
+            value: (statsData?.recentLogs?.[0]?.date && moment(statsData.recentLogs[0].date).utcOffset('+05:30').isSame(moment().utcOffset('+05:30'), 'day')) 
                 ? (statsData.recentLogs[0].punchIn ? moment(statsData.recentLogs[0].punchIn).format('hh:mm A') : 'Not Yet')
                 : 'Not Yet', 
-            sub: (statsData?.recentLogs?.[0]?.date && moment(statsData.recentLogs[0].date).isSame(moment(), 'day'))
+            sub: (statsData?.recentLogs?.[0]?.date && moment(statsData.recentLogs[0].date).utcOffset('+05:30').isSame(moment().utcOffset('+05:30'), 'day'))
                 ? (statsData.recentLogs[0].status || 'Active')
                 : 'Pending', 
             icon: Clock, 
@@ -180,48 +180,6 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-card rounded-[3rem] border shadow-sm p-8">
-                            <h3 className="text-lg font-black tracking-tight mb-6 flex items-center">
-                                <CalendarDays className="mr-3 text-primary" size={20} />
-                                Upcoming Holidays
-                            </h3>
-                            <div className="space-y-4">
-                                {[
-                                    { date: 'Jun 15', name: 'Juneteenth', type: 'Public' },
-                                    { date: 'Jul 04', name: 'Independence Day', type: 'Public' },
-                                    { date: 'Sep 02', name: 'Labor Day', type: 'Public' }
-                                ].map((h) => (
-                                    <div key={h.name} className="flex items-center justify-between p-4 rounded-2xl bg-secondary/30">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-xl bg-background flex flex-col items-center justify-center border shadow-sm">
-                                                <span className="text-[8px] font-black uppercase text-red-500">{h.date.split(' ')[0]}</span>
-                                                <span className="text-sm font-black leading-tight">{h.date.split(' ')[1]}</span>
-                                            </div>
-                                            <p className="text-sm font-bold">{h.name}</p>
-                                        </div>
-                                        <span className="text-[9px] font-black px-2 py-1 bg-primary/10 text-primary rounded-full uppercase">{h.type}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="bg-card rounded-[3rem] border shadow-sm p-8">
-                            <h3 className="text-lg font-black tracking-tight mb-6 flex items-center">
-                                <Briefcase className="mr-3 text-primary" size={20} />
-                                System Status
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-2xl border-2 border-dashed border-secondary hover:border-primary/30 transition-colors">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <p className="font-bold text-sm">Backend Engine</p>
-                                        <span className="text-[9px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 rounded-full uppercase">Operational</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">All systems are synchronized with real-time data.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Sidebar Column: Quick Actions & Profile Summary */}
@@ -232,9 +190,9 @@ const EmployeeDashboard = () => {
                         <div className="grid grid-cols-2 gap-4 relative z-10">
                             {[
                                 { label: 'Apply Leave', icon: Plane, to: '/dashboard/leave', color: 'bg-rose-500/10 text-rose-500' },
-                                { label: 'Get Payslip', icon: FileText, to: '/dashboard/payroll', color: 'bg-emerald-500/10 text-emerald-500' },
                                 { label: 'Mark Attendance', icon: UserCheck, to: '/dashboard/attendance', color: 'bg-blue-500/10 text-blue-500' },
-                                { label: 'Claim Expense', icon: Wallet, to: '/dashboard/payroll', color: 'bg-purple-500/10 text-purple-500' },
+                                { label: 'Org Chart', icon: Building2, to: '/dashboard/org', color: 'bg-emerald-500/10 text-emerald-500' },
+                                { label: 'My Profile', icon: UserCircle, to: '/dashboard/profile', color: 'bg-purple-500/10 text-purple-500' },
                             ].map((action) => (
                                 <Link 
                                     to={action.to} 

@@ -10,7 +10,6 @@ import ResetPassword from './pages/ResetPassword';
 import Attendance from './pages/Attendance';
 import Profile from './pages/Profile';
 import Leave from './pages/Leave';
-import Payroll from './pages/Payroll';
 import Documents from './pages/Documents';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
@@ -52,7 +51,6 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="notifications" element={<Notifications />} />
-            <Route path="payroll" element={<Payroll />} />
             <Route path="documents" element={<Documents />} />
             <Route path="team" element={<Team />} />
             <Route path="approvals" element={<Approvals />} />
@@ -60,7 +58,6 @@ function App() {
             <Route path="register-user" element={<RegisterUser />} />
             <Route path="roles" element={<UsersRoles />} />
             <Route path="workflows" element={<Workflows />} />
-            <Route path="ai-assistant" element={<AIAssistant />} />
 
           </Route>
         </Route>
