@@ -8,9 +8,9 @@ import mongoose from 'mongoose';
 
 export class DashboardService {
     async getHRDashboardStats(tenantId: string) {
-        const today = moment().startOf('day').toDate();
-        const startOfMonth = moment().startOf('month').toDate();
-        const endOfMonth = moment().endOf('month').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
+        const startOfMonth = moment().utcOffset('+05:30').startOf('month').toDate();
+        const endOfMonth = moment().utcOffset('+05:30').endOf('month').toDate();
 
         const [
             totalEmployees,
@@ -59,8 +59,8 @@ export class DashboardService {
                 { 
                     $match: { 
                         tenantId: new mongoose.Types.ObjectId(tenantId),
-                        month: moment().month() + 1,
-                        year: moment().year()
+                        month: moment().utcOffset('+05:30').month() + 1,
+                        year: moment().utcOffset('+05:30').year()
                     } 
                 },
                 { $group: { _id: "$status", count: { $sum: 1 } } }
@@ -69,7 +69,7 @@ export class DashboardService {
                 { 
                     $match: { 
                         tenantId: new mongoose.Types.ObjectId(tenantId),
-                        date: { $gte: moment().subtract(30, 'days').toDate() }
+                        date: { $gte: moment().utcOffset('+05:30').subtract(30, 'days').toDate() }
                     } 
                 },
                 { 
@@ -106,8 +106,8 @@ export class DashboardService {
     }
 
     async getManagerDashboardStats(managerId: string, tenantId: string) {
-        const today = moment().startOf('day').toDate();
-        const yesterday = moment().subtract(1, 'day').startOf('day').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
+        const yesterday = moment().utcOffset('+05:30').subtract(1, 'day').startOf('day').toDate();
 
         const [
             teamSize,
@@ -133,7 +133,7 @@ export class DashboardService {
                 { 
                     $match: { 
                         tenantId: new mongoose.Types.ObjectId(tenantId),
-                        date: { $gte: moment().subtract(14, 'days').toDate() }
+                        date: { $gte: moment().utcOffset('+05:30').subtract(14, 'days').toDate() }
                     } 
                 },
                 { 
@@ -150,7 +150,7 @@ export class DashboardService {
                 { 
                     $match: { 
                         tenantId: new mongoose.Types.ObjectId(tenantId),
-                        date: { $gte: moment().subtract(30, 'days').toDate() }
+                        date: { $gte: moment().utcOffset('+05:30').subtract(30, 'days').toDate() }
                     } 
                 },
                 {
@@ -194,8 +194,8 @@ export class DashboardService {
     }
 
     async getEmployeeDashboardStats(userId: string, tenantId: string) {
-        const today = moment().startOf('day').toDate();
-        const startOfMonth = moment().startOf('month').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
+        const startOfMonth = moment().utcOffset('+05:30').startOf('month').toDate();
 
         const [
             attendanceSummary,
@@ -223,12 +223,12 @@ export class DashboardService {
     }
 
     async getExecutiveDashboardStats(tenantId: string) {
-        const today = moment().startOf('day').toDate();
-        const startOfThisMonth = moment().startOf('month').toDate();
-        const startOfLastMonth = moment().subtract(1, 'month').startOf('month').toDate();
+        const today = moment().utcOffset('+05:30').startOf('day').toDate();
+        const startOfThisMonth = moment().utcOffset('+05:30').startOf('month').toDate();
+        const startOfLastMonth = moment().utcOffset('+05:30').subtract(1, 'month').startOf('month').toDate();
         
         // Use a 6-month window for trends
-        const sixMonthsAgo = moment().subtract(5, 'months').startOf('month').toDate();
+        const sixMonthsAgo = moment().utcOffset('+05:30').subtract(5, 'months').startOf('month').toDate();
 
         const [
             totalUsers,
@@ -292,7 +292,7 @@ export class DashboardService {
                 }
             ]),
             Attendance.aggregate([
-                { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().subtract(30, 'days').toDate() } } },
+                { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().utcOffset('+05:30').subtract(30, 'days').toDate() } } },
                 { $group: { _id: null, avgHours: { $avg: "$workHours" } } }
             ]),
             User.countDocuments({ tenantId, isActive: false }),
@@ -325,8 +325,8 @@ export class DashboardService {
         // Format growth trend for UI with REAL data
         const months = [];
         for (let i = 5; i >= 0; i--) {
-            const startOfMonthWindow = moment().subtract(i, 'months').startOf('month').toDate();
-            const endOfMonthWindow = moment().subtract(i, 'months').endOf('month').toDate();
+            const startOfMonthWindow = moment().utcOffset('+05:30').subtract(i, 'months').startOf('month').toDate();
+            const endOfMonthWindow = moment().utcOffset('+05:30').subtract(i, 'months').endOf('month').toDate();
             
             const [cumulativeCount, monthlyHires] = await Promise.all([
                 User.countDocuments({ 
@@ -376,7 +376,7 @@ export class DashboardService {
                 workforceGrowth: months,
                 deptDistribution,
                 attendanceHeatmap: await Attendance.aggregate([
-                    { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().subtract(28, 'days').toDate() } } },
+                    { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().utcOffset('+05:30').subtract(28, 'days').toDate() } } },
                     { $project: { 
                         dayOfWeek: { $dayOfWeek: "$date" }, 
                         week: { $floor: { $divide: [{ $subtract: ["$$NOW", "$date"] }, 1000 * 60 * 60 * 24 * 7] } },
@@ -429,7 +429,7 @@ export class DashboardService {
             },
             aiInsights: {
                 attrition: await Attendance.aggregate([
-                    { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().subtract(7, 'days').toDate() } } },
+                    { $match: { tenantId: new mongoose.Types.ObjectId(tenantId), date: { $gte: moment().utcOffset('+05:30').subtract(7, 'days').toDate() } } },
                     { $group: { 
                         _id: "$userId", 
                         isLate: { $sum: { $cond: [{ $eq: ["$status", "Late"] }, 1, 0] } },
