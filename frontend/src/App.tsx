@@ -58,7 +58,7 @@ function App() {
             <Route path="register-user" element={<RegisterUser />} />
             <Route path="roles" element={<UsersRoles />} />
             <Route path="workflows" element={<Workflows />} />
-
+            <Route path="ai" element={<AIAssistant />} />
           </Route>
         </Route>
 

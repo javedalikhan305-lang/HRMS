@@ -89,6 +89,7 @@ const DashboardLayout = () => {
         {
             title: 'Intelligence',
             items: [
+                { icon: Bot, label: 'AI Assistant', to: '/dashboard/ai' },
                 { icon: FileText, label: 'Report Engine', to: '/dashboard/reports' },
                 { icon: Bell, label: 'Notifications', to: '/dashboard/notifications' },
             ]
@@ -131,6 +132,7 @@ const DashboardLayout = () => {
         {
             title: 'Insights',
             items: [
+                { icon: Bot, label: 'AI Assistant', to: '/dashboard/ai' },
                 { icon: FileText, label: 'My Reports', to: '/dashboard/reports' },
             ]
         },
@@ -175,6 +177,7 @@ const DashboardLayout = () => {
         {
             title: 'Insights',
             items: [
+                { icon: Bot, label: 'AI Assistant', to: '/dashboard/ai' },
                 { icon: FileText, label: 'Team Analytics', to: '/dashboard/reports' },
                 { icon: Bell, label: 'Notifications', to: '/dashboard/notifications' },
             ]
